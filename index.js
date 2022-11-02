@@ -1,7 +1,6 @@
 "use strict";
 
 
-
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const form = document.querySelector('.form');
 const containerWorkouts = document.querySelector('.workouts');
@@ -49,13 +48,14 @@ class App {
         this._getPosition();
         form.addEventListener("submit", this._newWorkout.bind(this));
         inputType.addEventListener("change", this._toggleElevationField.bind(this));
+        containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
     }
     _getPosition() {  //Ne ia pozitia noastra geografica.
         navigator.geolocation.getCurrentPosition(this._loadMap.bind(this), function() { alert("Could not get your position!"); });
     }
     _loadMap(position) {  //Ne centreaza harta in functie de pozitia noastra geografica.
         let {latitude, longitude} = position.coords;   
-        this.#map = L.map('map').setView([latitude, longitude], 15);
+        this.#map = L.map('map').setView([latitude, longitude], 14);
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(this.#map);
         this.#map.on("click", this._showForm.bind(this));
     }
@@ -132,6 +132,12 @@ class App {
     }
     _hideForm() {  //Ne ascunde forma de unde putem introduce un nou antrenament.
         form.classList.add("hidden");
+    }
+    _moveToPopup(e) {  //Cand dam click pe unul din antrenamentele din lista din dreapta, ne centreaza automat harta in jurul acestuia.
+        if (e.target.closest("li")) {
+            let workoutElement = this.#workouts.find(elem => elem.id === e.target.closest(".workout").dataset.id);
+            this.#map.setView(workoutElement.coords, 14, {animate: true, pan: {duration: 1}});
+        }
     }
 }
 let app = new App();
